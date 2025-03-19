@@ -19,7 +19,6 @@ namespace NetworkConnectMod
     [BepInPlugin("kirigiri.repo.networkconnect", "NetworkConnect Mod By Kirigiri", "1.0.0.0")]
     public class NetworkConnectMod : BaseUnityPlugin
     {
-
         // If punVoiceClient is a prefab or an existing object, assign it in the Unity Inspector
 
 
@@ -46,27 +45,43 @@ namespace NetworkConnectMod
 
             try
             {
-                string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "photon_config.json");
+                // Define the path to your INI file
+                string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
 
                 if (File.Exists(configFilePath))
                 {
-                    // Deserialize settings from the json config
-                    PhotonAppSettings photonAppSettings = JsonConvert.DeserializeObject<PhotonAppSettings>(File.ReadAllText(configFilePath));
-                    serverSettings.AppSettings.AppIdRealtime = photonAppSettings.AppIdRealtime;
-                    serverSettings.AppSettings.AppIdChat = photonAppSettings.AppIdChat;
-                    serverSettings.AppSettings.AppIdVoice = photonAppSettings.AppIdVoice;
-                    serverSettings.AppSettings.AppIdFusion = photonAppSettings.AppIdFusion;
+                    // Read all lines from the INI file
+                    var settings = File.ReadAllLines(configFilePath)
+                                       .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith(";"))
+                                       .Select(line => line.Split('='))
+                                       .Where(parts => parts.Length == 2)
+                                       .ToDictionary(parts => parts[0].Trim(), parts => parts[1].Trim());
 
-                    Logger.LogInfo($"Address read are {photonAppSettings.AppIdRealtime} & {photonAppSettings.AppIdVoice}");
+                    // Assign values from the INI file
+                    if (settings.ContainsKey("AppIdRealtime"))
+                        serverSettings.AppSettings.AppIdRealtime = settings["AppIdRealtime"];
 
-                    if (!string.IsNullOrEmpty(photonAppSettings.FixedRegion))
+                    if (settings.ContainsKey("AppIdChat"))
+                        serverSettings.AppSettings.AppIdChat = settings["AppIdChat"];
+
+                    if (settings.ContainsKey("AppIdVoice"))
+                        serverSettings.AppSettings.AppIdVoice = settings["AppIdVoice"];
+
+                    if (settings.ContainsKey("AppIdFusion"))
+                        serverSettings.AppSettings.AppIdFusion = settings["AppIdFusion"];
+
+                    Logger.LogInfo($"Address read are {serverSettings.AppSettings.AppIdRealtime} & {serverSettings.AppSettings.AppIdVoice}");
+
+                    // Handle FixedRegion setting
+                    if (settings.ContainsKey("FixedRegion"))
                     {
-                        PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = photonAppSettings.FixedRegion;
+                        PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = settings["FixedRegion"];
                     }
                     else
                     {
                         PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = "";
                     }
+
                     Logger.LogInfo($"Photon settings loaded from {configFilePath}");
                 }
                 else
