@@ -142,13 +142,96 @@ namespace NetworkConnectMod
 
         public void CustomAuth()
         {
-            string value = this.GetSteamAuthTicket(out this.steamAuthTicket);
+            string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
+            string authSetting = "None"; // Default value if not found or invalid
+
+            try
+            {
+                if (File.Exists(configFilePath))
+                {
+                    // Read all lines from the INI file
+                    var settings = File.ReadAllLines(configFilePath)
+                                       .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith(";"))
+                                       .Select(line => line.Split('='))
+                                       .Where(parts => parts.Length == 2)
+                                       .ToDictionary(parts => parts[0].Trim(), parts => parts[1].Trim());
+
+                    if (settings.ContainsKey("Auth"))
+                    {
+                        authSetting = settings["Auth"];
+                    }
+                    else
+                    {
+                        Logger.LogWarning("Auth setting not found in the INI file, defaulting to 'None'.");
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning($"Settings file not found at {configFilePath}. Using default Auth value 'None'.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error reading Auth setting from INI: {ex.Message}. Defaulting to 'None'.");
+            }
+
+            // Map the string to the corresponding CustomAuthenticationType
             PhotonNetwork.AuthValues = new AuthenticationValues();
             PhotonNetwork.AuthValues.UserId = SteamClient.SteamId.ToString();
-            PhotonNetwork.AuthValues.AuthType = CustomAuthenticationType.None;
+
+            CustomAuthenticationType authType = CustomAuthenticationType.None; // Default to None
+
+            // Check the Auth setting and set the corresponding authentication type
+            switch (authSetting.ToLower())
+            {
+                case "custom":
+                    authType = CustomAuthenticationType.Custom;
+                    break;
+                case "steam":
+                    authType = CustomAuthenticationType.Steam;
+                    break;
+                case "facebook":
+                    authType = CustomAuthenticationType.Facebook;
+                    break;
+                case "oculus":
+                    authType = CustomAuthenticationType.Oculus;
+                    break;
+                case "playstation4":
+                    authType = CustomAuthenticationType.PlayStation4;
+                    break;
+                case "xbox":
+                    authType = CustomAuthenticationType.Xbox;
+                    break;
+                case "viveport":
+                    authType = CustomAuthenticationType.Viveport;
+                    break;
+                case "nintendoswitch":
+                    authType = CustomAuthenticationType.NintendoSwitch;
+                    break;
+                case "playstation5":
+                    authType = CustomAuthenticationType.PlayStation5;
+                    break;
+                case "epic":
+                    authType = CustomAuthenticationType.Epic;
+                    break;
+                case "facebookgaming":
+                    authType = CustomAuthenticationType.FacebookGaming;
+                    break;
+                case "none":
+                default:
+                    authType = CustomAuthenticationType.None;
+                    break;
+            }
+
+            PhotonNetwork.AuthValues.AuthType = authType;
+
+            // Add the Auth parameter (e.g., the Steam ticket)
+            string value = this.GetSteamAuthTicket(out this.steamAuthTicket);
             PhotonNetwork.AuthValues.AddAuthParameter("ticket", value);
-            Logger.LogInfo("Patched Auth to None !");
+
+            Logger.LogInfo($"Patched Auth to {PhotonNetwork.AuthValues.AuthType}!");
         }
+
 
 
         // Patch the original Start method with the custom one
