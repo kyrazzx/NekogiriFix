@@ -1,11 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
@@ -13,15 +9,13 @@ using Photon.Pun;
 using Photon.Realtime;
 using Steamworks;
 using Newtonsoft.Json;
+using Steamworks.Data;
 
 namespace NetworkConnectMod
 {
     [BepInPlugin("kirigiri.repo.networkconnect", "NetworkConnect Mod By Kirigiri", "1.0.0.0")]
     public class NetworkConnectMod : BaseUnityPlugin
     {
-        // If punVoiceClient is a prefab or an existing object, assign it in the Unity Inspector
-
-
         private void Awake()
         {
             // Set up plugin logging
@@ -97,6 +91,66 @@ namespace NetworkConnectMod
             }
         }
 
+        // Custom method to initialize Steam with a dynamic App ID from the INI file
+        private void CustomSteamAppID()
+        {
+            string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
+            uint appId = 480U; // Default value for AppId if not found
+
+            try
+            {
+                if (File.Exists(configFilePath))
+                {
+                    // Read all lines from the INI file
+                    var settings = File.ReadAllLines(configFilePath)
+                                       .Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith(";"))
+                                       .Select(line => line.Split('='))
+                                       .Where(parts => parts.Length == 2)
+                                       .ToDictionary(parts => parts[0].Trim(), parts => parts[1].Trim());
+
+                    if (settings.ContainsKey("SteamAppId"))
+                    {
+                        // Try to parse the App ID from the file, if available
+                        if (uint.TryParse(settings["SteamAppId"], out uint parsedAppId))
+                        {
+                            appId = parsedAppId;
+                        }
+                        else
+                        {
+                            Logger.LogWarning("Invalid SteamAppId in the INI file, defaulting to 480.");
+                        }
+                    }
+                    else
+                    {
+                        Logger.LogWarning("SteamAppId not found in the INI file, defaulting to 480.");
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning($"Settings file not found at {configFilePath}. Using default App ID 480.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error reading SteamAppId from INI: {ex.Message}. Defaulting to App ID 480.");
+            }
+
+            // Initialize Steam client with the dynamic AppId
+            SteamClient.Init(appId, true);
+            Logger.LogInfo($"Steam client initialized with AppId {appId}");
+        }
+
+        public void CustomAuth()
+        {
+            string value = this.GetSteamAuthTicket(out this.steamAuthTicket);
+            PhotonNetwork.AuthValues = new AuthenticationValues();
+            PhotonNetwork.AuthValues.UserId = SteamClient.SteamId.ToString();
+            PhotonNetwork.AuthValues.AuthType = CustomAuthenticationType.None;
+            PhotonNetwork.AuthValues.AddAuthParameter("ticket", value);
+            Logger.LogInfo("Patched Auth to None !");
+        }
+
+
         // Patch the original Start method with the custom one
         [HarmonyPatch(typeof(NetworkConnect), "Start")]
         public class NetworkConnectPatch
@@ -115,6 +169,56 @@ namespace NetworkConnectMod
                 return true; // Skipping the original Start method
             }
         }
+
+        [HarmonyPatch(typeof(SteamManager), "Awake")]
+        public class SteamManagerPatch
+        {
+            // Prefix is called before the original method is called
+            // Suffix is called after the original method is executed
+
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                // Instead of the original Start method, call CustomStart
+                Debug.Log("Patching NetworkConnect.Start method.");
+                new NetworkConnectMod().CustomSteamAppID();
+
+                // Return false to skip the original Start method
+                return true; // Skipping the original Start method
+            }
+        }
+
+        [HarmonyPatch(typeof(SteamManager), "SendSteamAuthTicket")]
+        public class SendSteamAuthTicketPatch
+        {
+            // Prefix is called before the original method is called
+            // Suffix is called after the original method is executed
+
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                // Instead of the original Start method, call CustomStart
+                Debug.Log("Patching NetworkConnect.Start method.");
+                new NetworkConnectMod().CustomAuth();
+
+                // Return false to skip the original Start method
+                return false; // Skipping the original Start method
+            }
+        }
+
+        private string GetSteamAuthTicket(out AuthTicket ticket)
+        {
+            Debug.Log("Getting Steam Auth Ticket...");
+            ticket = SteamUser.GetAuthSessionTicket();
+            System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+            for (int i = 0; i < ticket.Data.Length; i++)
+            {
+                stringBuilder.AppendFormat("{0:x2}", ticket.Data[i]);
+            }
+            return stringBuilder.ToString();
+        }
+
+        internal AuthTicket steamAuthTicket;
 
         // The PhotonAppSettings class should be outside CustomStart, at the class level
         [Serializable]
