@@ -263,7 +263,7 @@ namespace NetworkConnectMod
             public static bool Prefix()
             {
                 // Instead of the original Start method, call CustomStart
-                Debug.Log("Patching NetworkConnect.Start method.");
+                Debug.Log("Patching SteamManager.Awake method.");
                 new NetworkConnectMod().CustomSteamAppID();
 
                 // Return false to skip the original Start method
@@ -281,7 +281,7 @@ namespace NetworkConnectMod
             public static bool Prefix()
             {
                 // Instead of the original Start method, call CustomStart
-                Debug.Log("Patching NetworkConnect.Start method.");
+                Debug.Log("Patching SteamManager.SendSteamAuthTicket method.");
                 new NetworkConnectMod().CustomAuth();
 
                 // Return false to skip the original Start method
