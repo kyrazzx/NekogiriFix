@@ -80,15 +80,6 @@ namespace NetworkConnectMod
                 PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = "";
                 Logger.LogError($"Error loading Photon settings: {ex.Message}. Using default values.");
             }
-
-            // Set up the player's name to Steam client name
-            PhotonNetwork.NickName = SteamClient.Name;
-
-            // Ensure scenes are not automatically synced
-            PhotonNetwork.AutomaticallySyncScene = false;
-
-            // Disconnect from Photon (if necessary)
-            PhotonNetwork.Disconnect();
         }
 
         // Patch the original Start method with the custom one
