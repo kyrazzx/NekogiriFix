@@ -13,7 +13,7 @@ using Steamworks.Data;
 
 namespace NetworkConnectMod
 {
-    [BepInPlugin("kirigiri.repo.networkconnect", "NetworkConnect Mod By Kirigiri", "1.0.0.0")]
+    [BepInPlugin("kirigiri.repo.networkconnect", "NetworkConnect Mod By Kirigiri", "1.0.0.5")]
     public class NetworkConnectMod : BaseUnityPlugin
     {
         private void Awake()
@@ -26,7 +26,7 @@ namespace NetworkConnectMod
             harmony.PatchAll();  // Automatically patch all methods that have the PatchAttribute
 
             // Optionally log that the patch has been applied
-            Logger.LogInfo("Harmony patch applied to the Start method of NetworkConnect.");
+            Logger.LogInfo("Made with <3 By Kirigiri \nhttps://discord.gg/zn2a2A65My");
         }
 
         // The custom method to replace the original Start method
