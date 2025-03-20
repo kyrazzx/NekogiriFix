@@ -7,8 +7,8 @@
     <ProjectGuid>{BE8D4052-15E4-4CC0-8481-034B8DD0E20D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KirigiriNetworkConnectMod</RootNamespace>
-    <AssemblyName>KirigiriNetworkConnectMod</AssemblyName>
+    <RootNamespace>NekogiriMod</RootNamespace>
+    <AssemblyName>Nekogiri</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -74,7 +74,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Nekogiri.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

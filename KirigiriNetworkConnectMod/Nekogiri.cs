@@ -11,18 +11,18 @@ using Steamworks;
 using Newtonsoft.Json;
 using Steamworks.Data;
 
-namespace NetworkConnectMod
+namespace NekogiriMod
 {
-    [BepInPlugin("kirigiri.repo.networkconnect", "NetworkConnect Mod By Kirigiri", "1.0.0.5")]
-    public class NetworkConnectMod : BaseUnityPlugin
+    [BepInPlugin("kirigiri.repo.nekogiri", "Nekogiri", "1.0.0.5")]
+    public class NekogiriMod : BaseUnityPlugin
     {
         private void Awake()
         {
             // Set up plugin logging
-            Logger.LogInfo("NetworkConnectMod has loaded!");
+            Logger.LogInfo("Nekogiri has loaded!");
 
             // Create a Harmony instance and apply the patch
-            var harmony = new Harmony("kirigiri.repo.networkconnect");
+            var harmony = new Harmony("kirigiri.repo.nekogiri");
             harmony.PatchAll();  // Automatically patch all methods that have the PatchAttribute
 
             // Optionally log that the patch has been applied
@@ -94,6 +94,7 @@ namespace NetworkConnectMod
         // Custom method to initialize Steam with a dynamic App ID from the INI file
         private void CustomSteamAppID()
         {
+            Logger.LogInfo("Custom Steam AppID method executed!");
             string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
             uint appId = 480U; // Default value for AppId if not found
 
@@ -142,6 +143,7 @@ namespace NetworkConnectMod
 
         public void CustomAuth()
         {
+            Logger.LogInfo("Custom Auth method executed!");
             string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
             string authSetting = "None"; // Default value if not found or invalid
 
@@ -246,7 +248,7 @@ namespace NetworkConnectMod
             {
                 // Instead of the original Start method, call CustomStart
                 Debug.Log("Patching NetworkConnect.Start method.");
-                new NetworkConnectMod().CustomStart();
+                new NekogiriMod().CustomStart();
 
                 // Return false to skip the original Start method
                 return true; // Skipping the original Start method
@@ -264,7 +266,7 @@ namespace NetworkConnectMod
             {
                 // Instead of the original Start method, call CustomStart
                 Debug.Log("Patching SteamManager.Awake method.");
-                new NetworkConnectMod().CustomSteamAppID();
+                new NekogiriMod().CustomSteamAppID();
 
                 // Return false to skip the original Start method
                 return true; // Skipping the original Start method
@@ -282,7 +284,7 @@ namespace NetworkConnectMod
             {
                 // Instead of the original Start method, call CustomStart
                 Debug.Log("Patching SteamManager.SendSteamAuthTicket method.");
-                new NetworkConnectMod().CustomAuth();
+                new NekogiriMod().CustomAuth();
 
                 // Return false to skip the original Start method
                 return false; // Skipping the original Start method
