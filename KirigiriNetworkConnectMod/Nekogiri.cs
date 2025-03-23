@@ -13,7 +13,7 @@ using Steamworks.Data;
 
 namespace NekogiriMod
 {
-    [BepInPlugin("kirigiri.repo.nekogiri", "Nekogiri", "1.0.0.5")]
+    [BepInPlugin("kirigiri.repo.nekogiri", "Nekogiri", "1.0.4.0")]
     public class NekogiriMod : BaseUnityPlugin
     {
         private void Awake()
@@ -256,6 +256,7 @@ namespace NekogiriMod
                             {
                                 // Show the welcome message
                                 MenuManager.instance.PagePopUp("Made By Kirigiri", UnityEngine.Color.magenta, "<size=20>This mod has been made by Kirigiri.\nMake sure to create an account on <color=#808080>https://www.photonengine.com/</color> and to fill the values inside the <color=#34ebde>Kirigiri.ini</color> file !\nThis message will appear only once, Have fun !", "OK");
+                                Application.OpenURL("https://www.photonengine.com/");
 
                                 // Update FirstLaunch to 0
                                 lines[i] = "FirstLaunch=0";
