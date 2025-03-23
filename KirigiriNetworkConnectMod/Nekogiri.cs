@@ -234,6 +234,51 @@ namespace NekogiriMod
             Logger.LogInfo($"Patched Auth to {PhotonNetwork.AuthValues.AuthType}!");
         }
 
+        private void WelcomeMessage()
+        {
+            string configFilePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), "Kirigiri.ini");
+
+            try
+            {
+                if (File.Exists(configFilePath))
+                {
+                    // Read all lines from the INI file while preserving sections and comments
+                    var lines = File.ReadAllLines(configFilePath).ToList();
+                    bool welcomeReadUpdated = false;
+
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        // Look for the line containing "WelcomeRead"
+                        if (lines[i].StartsWith("FirstLaunch"))
+                        {
+                            // If WelcomeRead is 0, show the message and update to 1
+                            if (lines[i].Contains("FirstLaunch=1"))
+                            {
+                                // Show the welcome message
+                                MenuManager.instance.PagePopUp("Made By Kirigiri", UnityEngine.Color.magenta, "<size=20>This mod has been made by Kirigiri.\nMake sure to create an account on <color=#808080>https://www.photonengine.com/</color> and to fill the values inside the <color=#34ebde>Kirigiri.ini</color> file !\nThis message will appear only once, Have fun !", "OK");
+
+                                // Update WelcomeRead to 1
+                                lines[i] = "FirstLaunch=0";
+                                welcomeReadUpdated = true;
+                                Logger.LogInfo("Welcome message displayed and FirstLaunch updated.");
+                            }
+                            break;
+                        }
+                    }
+
+                    // If the WelcomeRead was updated, write back the modified lines
+                    if (welcomeReadUpdated)
+                    {
+                        File.WriteAllLines(configFilePath, lines);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error reading or updating Kirigiri.ini: {ex.Message}");
+            }
+        }
+
 
 
         // Patch the original Start method with the custom one
@@ -249,6 +294,25 @@ namespace NekogiriMod
                 // Instead of the original Start method, call CustomStart
                 Debug.Log("Patching NetworkConnect.Start method.");
                 new NekogiriMod().CustomStart();
+
+                // Return false to skip the original Start method
+                return true; // Skipping the original Start method
+            }
+        }
+
+        // Patch the original Start method with the custom one
+        [HarmonyPatch(typeof(MenuPageMain), "Start")]
+        public class MenuPageMainPatch
+        {
+            // Prefix is called before the original method is called
+            // Suffix is called after the original method is executed
+
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                // Instead of the original Start method, call CustomStart
+                Debug.Log("Patching NetworkConnect.Start method.");
+                new NekogiriMod().WelcomeMessage();
 
                 // Return false to skip the original Start method
                 return true; // Skipping the original Start method
