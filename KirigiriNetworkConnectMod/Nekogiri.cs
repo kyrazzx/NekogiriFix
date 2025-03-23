@@ -257,7 +257,7 @@ namespace NekogiriMod
                                 // Show the welcome message
                                 MenuManager.instance.PagePopUp("Made By Kirigiri", UnityEngine.Color.magenta, "<size=20>This mod has been made by Kirigiri.\nMake sure to create an account on <color=#808080>https://www.photonengine.com/</color> and to fill the values inside the <color=#34ebde>Kirigiri.ini</color> file !\nThis message will appear only once, Have fun !", "OK");
 
-                                // Update WelcomeRead to 1
+                                // Update FirstLaunch to 0
                                 lines[i] = "FirstLaunch=0";
                                 welcomeReadUpdated = true;
                                 Logger.LogInfo("Welcome message displayed and FirstLaunch updated.");
@@ -310,8 +310,8 @@ namespace NekogiriMod
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                // Instead of the original Start method, call CustomStart
-                Debug.Log("Patching NetworkConnect.Start method.");
+                // Instead of the original Start method, call WelcomeMessage
+                Debug.Log("Patching MenuPageMain.Start method.");
                 new NekogiriMod().WelcomeMessage();
 
                 // Return false to skip the original Start method
@@ -328,7 +328,7 @@ namespace NekogiriMod
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                // Instead of the original Start method, call CustomStart
+                // Instead of the original Start method, call CustomSteamAppID
                 Debug.Log("Patching SteamManager.Awake method.");
                 new NekogiriMod().CustomSteamAppID();
 
@@ -346,7 +346,7 @@ namespace NekogiriMod
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                // Instead of the original Start method, call CustomStart
+                // Instead of the original Start method, call CustomAuth
                 Debug.Log("Patching SteamManager.SendSteamAuthTicket method.");
                 new NekogiriMod().CustomAuth();
 
