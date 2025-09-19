@@ -29,7 +29,7 @@ namespace NekogiriMod
             harmony.PatchAll();  // Automatically patch all methods that have the PatchAttribute
 
             // Optionally log that the patch has been applied
-            Log.LogInfo("Made with <3 By Kirigiri \nhttps://discord.gg/zn2a2A65My");
+            Log.LogInfo("Made with <3 By Kirigiri \nhttps://discord.gg/QSzSyyXtZE");
         }
 
         private static Dictionary<string, string> ReadSettings()
